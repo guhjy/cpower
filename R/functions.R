@@ -85,90 +85,62 @@ test.contr<-function(data,yname,xname,cont,debug=FALSE) {
 
 
 
-power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05) {
+power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05,type="two.sample",alternative=c("two.sided","one.sided")) {
 
-  if (scale=="g") {
-    w<-sum(abs(cont))/2
-    d0=d*w
-  } else if (scale=="q") {
-    d0=d*sqrt(sum(cont^2))
-  } else {
-    d0=d/scale
+  .ncp<-NULL
+  NOTE<-""
+  if (!is.numeric(cont))
+     stop("'cont' must be a numeric vector")
+  if (sum(sapply(list(n, d, sd, power, sig.level), is.null)) != 1)
+    stop("exactly one of 'n', 'delta', 'sd', 'power', and 'sig.level' must be NULL")
+  if (!is.null(sig.level) && !is.numeric(sig.level) || any(0 > sig.level | sig.level > 1))
+          stop("'sig.level' must be numeric in [0, 1]")
+  type <- match.arg(type)
+  alternative <- match.arg(alternative)
+  #tsample <- switch(type, two.sample = 2, paired = 1)
+  tside <- switch(alternative, one.sided = 1, two.sided = 2)
+
+  if (tside == 2 && !is.null(d))
+    d <- abs(d)
+
+  if (!is.null(d)) {
+    if (scale=="g") {
+      w<-sum(abs(cont))/2
+      d0=d*w
+    } else if (scale=="q") {
+      d0=d*sqrt(sum(cont^2))
+    } else {
+      d0=d/scale
+    }
   }
+
   k=length(cont)
   ss<-sum(cont^2)
   alpha<-sig.level
-  p.body <- quote({
-    ncp<-sqrt(n/ss)*d0
-    np<-(n-1)*k
-    crit<-qt(alpha/2,np,lower.tail = F)
-    pt(crit, np, ncp = ncp, lower.tail = FALSE) +  pt(-crit, np, ncp = ncp, lower.tail = TRUE)
-  })
+
+
+  p.body <-
+        quote({
+          .ncp<-sqrt(n/ss)*d0
+          np<-(n-1)*k
+          crit<-qt(alpha/tside,np,lower.tail = F)
+          pt(crit, np, ncp = .ncp, lower.tail = FALSE) +  pt(-crit, np, ncp = .ncp, lower.tail = TRUE)
+      })
+
   if (is.null(power)) {
     power <- eval(p.body)
-    return(power)
   }
   if (is.null(n)) {
     n <- uniroot(function(n) eval(p.body) - power, c(2, 1e+05))$root
-    return(n)
   }
+  if (is.null(d))
+    d <- uniroot(function(d0) eval(p.body) - power,
+                      c(1e-07, 1e+07), extendInt = "upX")$root
+
+  NOTE <- switch(type, paired = "n is number of *pairs*, sd is std.dev. of *differences* within pairs",
+                 two.sample = "n is number in *each* group", NULL)
+  structure(list(n = n, d = d, sig.level = sig.level,
+                 power = power, alternative = alternative, note = NOTE,
+                 scale = scale,method="Contrast t-test power calculation"), class = "power.htest")
 }
-
-#' power function for contrasts
-#'
-#' computes power parameters for F-test associated with a custom contrast
-#'
-#' @param cont contrast codes as a numeric vector
-#' @param d effect size d
-#' @param n number of observations per cell
-#' @param sig.level significance level (Type I error probability)
-#' @param power power of test (1 minus Type II error probability)
-#' @param  method used to scale the d index
-#' @return Object of class '"power.htest"', a list of the arguments (including the computed one) augmented with 'method' and 'note' elements.
-#' @details Exactly one of the parameters 'd','n','power'
-#'      and 'sig.level' must be passed as NULL, and that parameter is determined from the others.
-#'      The parameter \code{scale} controls the method used to scale the effect size d.
-#'      \enumerate{
-#'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-#'     \item    \code{scale="q"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
-#'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
-#'    }
-#'
-#'
-#'
-#' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
-#' @keywords power, contrasts, planned comparisons
-
-
-power.contrast.f<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05) {
-
-  if (scale=="g") {
-    w<-sum(abs(cont))/2
-    d0=d*w
-  } else if (scale=="q") {
-    d0=d*sqrt(sum(cont^2))
-  } else {
-    d0=d/scale
-  }
-  k=length(cont)
-  ss<-sum(cont^2)
-  alpha<-sig.level
-  p.body <- quote({
-    ncp<-((n/ss)*d0^2)
-    np<-(n-1)*k
-    crit<-qf(sig.level, 1, np, lower.tail = FALSE)
-    pf(crit,1, np, ncp,lower.tail = FALSE)
-  })
-  if (is.null(power)) {
-    power <- eval(p.body)
-    return(power)
-  }
-  if (is.null(n)) {
-    n <- uniroot(function(n) eval(p.body) - power, c(2, 1e+05))$root
-    return(n)
-  }
-}
-
-
 
