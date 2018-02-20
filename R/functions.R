@@ -85,7 +85,7 @@ test.contr<-function(data,yname,xname,cont,debug=FALSE) {
 
 
 
-power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05,type="two.sample",alternative=c("two.sided","one.sided")) {
+power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05,type="between",alternative=c("two.sided","one.sided")) {
 
   .ncp<-NULL
   NOTE<-""
@@ -97,7 +97,7 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
           stop("'sig.level' must be numeric in [0, 1]")
   type <- match.arg(type)
   alternative <- match.arg(alternative)
-  #tsample <- switch(type, two.sample = 2, paired = 1)
+  #tsample <- switch(type, between = k, repeated = 1)
   tside <- switch(alternative, one.sided = 1, two.sided = 2)
 
   if (tside == 2 && !is.null(d))

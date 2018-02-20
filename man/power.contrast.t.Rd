@@ -5,7 +5,8 @@
 \title{power function for contrasts}
 \usage{
 power.contrast.t(cont = NULL, d = NULL, n = NULL, power = NULL,
-  scale = "g", sig.level = 0.05)
+  scale = "g", sig.level = 0.05, type = "two.sample",
+  alternative = c("two.sided", "one.sided"))
 }
 \arguments{
 \item{cont}{contrast codes as a numeric vector}
