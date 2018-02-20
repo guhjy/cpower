@@ -1,7 +1,25 @@
-power.t.test(10,d=1)
+### some try ###########
+power.t.test(n=10,delta=1)
+power.contrast.t(cont=c(1,-1),d=1,n=10)
 
-power.contrast.t(cont=c(1,-1),d=.3,power=.80)
-power.contrast.t(cont=c(1,-1),n=175,power=.80,alternative = "one.side")
-power.contrast.t(cont=c(1,-1),n=175,power=.80,alternative = "two.side")
+power.t.test(power=.80,delta=1)
+power.contrast.t(cont=c(1,-1),d=1,power=.80)
 
-print
+
+####### check if theoretical power works with simulated data #########
+cont<-c(1,-1/2,-1/2)
+m<-c(30,25,21)
+sp<-15
+n=12
+res<-power.contr.simulate(5000,n=n,cont = cont,means = m,sd=sp)
+summary.simulations(res)
+(dg<-d.contr(cont,m,sp))
+power.contrast.t(cont=cont,d=dg,n=n)
+
+####### check if expected N works with simulated data #########
+
+(pp<-power.contrast.t(cont=cont,d=dg,power=.70))
+n<-round(pp$n)
+res<-power.contr.simulate(5000,n=n,cont = cont,means = m,sd=sp)
+summary.simulations(res)
+

@@ -1,3 +1,63 @@
+#' Cohen's d for contrasts
+#'
+#' Compute Cohen's d for contrasts with different scaling functions
+#'
+#' @param cont contrast codes as a numeric vector
+#' @param means pattern of means as numeric vector of the same length of \code{cont}
+#' @param sd pooled standard deviation
+#' @param y  dependent variable
+#' @param x  independent variable with k-groups, with k being length(cont)
+#' @param scale scaling method of the d index
+#' @return t-test for the contrast.
+#' @details data to compute the d index can be either actual data or a vector of means and a standard deviation
+#'          actual data are specified with the \code{y} and \code{x} parameters, means and standard deviation
+#'          with the \code{means} , and \code{sd} parameters. The parameter \code{means} and \code{sd} are prevalent, thus
+#'          if \code{means},\code{y} and \code{x} are provided, but not \code{sd}, y and x are used to computed the pooled standard deviation.
+#'          If \code{means} and \code{sd} are provided, \code{y} and \code{x} are ignored.
+#'
+#'      The parameter \code{scale} controls the method used to scale the effect size d.
+#'      \enumerate{
+#'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
+#'     \item    \code{scale="q"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+#'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
+#'    }
+#'
+#'
+#' @author Marcello Gallucci, \email{mcfanda@gmail.com}
+#' @seealso \code{\link{cpower}}
+#' @keywords power, contrasts, planned comparisons
+#' @export
+
+
+d.contr<-function(cont,means=NULL,sd=NULL,y=NULL,x=NULL,scale="g") {
+  .badinput<-"data should be provided either as a vector of means and a pooled sd or as x and y variables"
+  if (all(is.null(means),is.null(y),is.null(x)))
+       stop(.badinput)
+  if (is.null(means)) {
+    if (is.null(y) | is.null(x))
+       stop(.badinput)
+    .x<-factor(x)
+    means<-tapply(y,.x,mean, na.rm=T)
+  }
+  if (is.null(sd)) {
+    if (is.null(y) | is.null(x))
+      stop(.badinput)
+    .x<-factor(x)
+    sd<-mean(tapply(y,.x,sd, na.rm=T))
+  }
+
+  d<-.method0(cont,means,sd)
+  if (scale=="g")
+     d<-.methodg(cont,d)
+  if (scale=="q")
+    d<-.methodq(cont,d)
+  if (is.numeric(scale))
+     d<-d*scale
+   return(as.numeric(d))
+
+}
+
+
 #' build a custom contrasts and k-2 orthogonal ones
 #'
 #' Creates a set of contrast codes that are orthogonal to a given one with the aim of
@@ -10,6 +70,8 @@
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
 #' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
+#' @export
+
 
 contr.custom<-function(cont) {
   k<-length(cont)
@@ -43,6 +105,7 @@ contr.custom<-function(cont) {
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
 #' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
+#' @export
 
 
 test.contr<-function(data,yname,xname,cont,debug=FALSE) {
@@ -82,8 +145,7 @@ test.contr<-function(data,yname,xname,cont,debug=FALSE) {
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
 #' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
-
-
+#' @export
 
 power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05,type="between",alternative=c("two.sided","one.sided")) {
 
@@ -139,8 +201,22 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
 
   NOTE <- switch(type, paired = "n is number of *pairs*, sd is std.dev. of *differences* within pairs",
                  two.sample = "n is number in *each* group", NULL)
-  structure(list(n = n, d = d, sig.level = sig.level,
+  structure(list(n = n, d = d, k=k, sig.level = sig.level,
                  power = power, alternative = alternative, note = NOTE,
                  scale = scale,method="Contrast t-test power calculation"), class = "power.htest")
 }
 
+
+.method0<-function(cont,means,ds) {
+  (cont%*%means)/ds
+}
+
+.methodg<-function(cont,d0) {
+  g<-2/sum(abs(cont))
+  g*d0
+}
+
+.methodq<-function(cont,d0) {
+  q<-1/sqrt(sum(cont^2))
+  q*d0
+}

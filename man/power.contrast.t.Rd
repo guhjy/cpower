@@ -5,7 +5,7 @@
 \title{power function for contrasts}
 \usage{
 power.contrast.t(cont = NULL, d = NULL, n = NULL, power = NULL,
-  scale = "g", sig.level = 0.05, type = "two.sample",
+  scale = "g", sig.level = 0.05, type = "between",
   alternative = c("two.sided", "one.sided"))
 }
 \arguments{
