@@ -36,7 +36,7 @@ data to compute the d index can be either actual data or a vector of means and a
      The parameter \code{scale} controls the method used to scale the effect size d.
      \enumerate{
     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-    \item    \code{scale="q"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+    \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
    }
 }

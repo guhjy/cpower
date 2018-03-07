@@ -5,7 +5,7 @@ Version: 0.2.0
 Author: Marcello Gallucci
 Maintainer: Marcello Gallucci <mcfanda@gmail.com>
 Description: Power functions and effect size indexes for contrasts
-License: Free
+License: GPL-2, GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1

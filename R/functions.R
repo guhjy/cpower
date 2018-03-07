@@ -18,7 +18,7 @@
 #'      The parameter \code{scale} controls the method used to scale the effect size d.
 #'      \enumerate{
 #'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-#'     \item    \code{scale="q"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
 #'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
 #'    }
 #'
@@ -47,23 +47,32 @@ d.contr<-function(cont,means=NULL,sd=NULL,y=NULL,x=NULL,scale="g") {
   }
 
   d<-.method0(cont,means,sd)
-  if (scale=="g")
+  scaled=FALSE
+  if (scale=="g") {
      d<-.methodg(cont,d)
-  if (scale=="q")
+     scaled=TRUE
+  }
+  if (scale=="z") {
     d<-.methodq(cont,d)
-  if (is.numeric(scale))
+    scaled=TRUE
+  }
+  if (is.numeric(scale)) {
      d<-d*scale
+     scaled=TRUE
+  }
+  if (!scaled)
+    warning("The index was not scaled")
    return(as.numeric(d))
 
 }
 
 
-#' build a custom contrasts and k-2 orthogonal ones
+#' build a custom contrast and k-2 orthogonal ones
 #'
 #' Creates a set of contrast codes that are orthogonal to a given one with the aim of
 #' testing the given contrast in a linear model
 #'
-#' @param cont Character string indicating a set of colors.
+#' @param cont vector of contrast weight (numeric).
 #'
 #' @return a data.frame with k-1 contrast codes, with k=length(cont).
 #'
@@ -113,10 +122,13 @@ test.contr<-function(data,yname,xname,cont,debug=FALSE) {
   data[,xname]<-factor(data[,xname])
   contrasts(data[,xname])<-con
   form<-as.formula(paste(yname,"~",xname))
-  ss<-summary(lm(form,data=data))
-  if (debug)
-    print(ss)
-  round(ss$coefficients[2,],5)
+  model<-lm(form,data=data)
+  ss<-summary(model)
+  ss$coefficients[2,]
+}
+
+print.test.contr<-function(obj) {
+print(summary.lm(obj))
 }
 
 
@@ -136,7 +148,7 @@ test.contr<-function(data,yname,xname,cont,debug=FALSE) {
 #'      The parameter \code{scale} controls the method used to scale the effect size d.
 #'      \enumerate{
 #'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-#'     \item    \code{scale="q"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
 #'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
 #'    }
 #'
@@ -207,8 +219,8 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
 }
 
 
-.method0<-function(cont,means,ds) {
-  (cont%*%means)/ds
+.method0<-function(cont,means,sd) {
+  (cont%*%means)/sd
 }
 
 .methodg<-function(cont,d0) {
@@ -219,4 +231,27 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
 .methodq<-function(cont,d0) {
   q<-1/sqrt(sum(cont^2))
   q*d0
+}
+
+.tod0<-function(cont,d,scale) {
+  if (scale=="g") {
+    w<-sum(abs(cont))/2
+    d0=d*w
+  } else if (scale=="z") {
+    d0=d*sqrt(sum(cont^2))
+  } else {
+    d0=d/scale
+  }
+d0
+}
+.fromd0<-function(cont,d0,scale) {
+  if (scale=="g") {
+    w<-2/sum(abs(cont))
+    d=d0*w
+  } else if (scale=="z") {
+    d=d0/sqrt(sum(cont^2))
+  } else {
+    d=d0*scale
+  }
+  d
 }

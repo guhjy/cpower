@@ -2,12 +2,12 @@
 % Please edit documentation in R/functions.R
 \name{contr.custom}
 \alias{contr.custom}
-\title{build a custom contrasts and k-2 orthogonal ones}
+\title{build a custom contrast and k-2 orthogonal ones}
 \usage{
 contr.custom(cont)
 }
 \arguments{
-\item{cont}{Character string indicating a set of colors.}
+\item{cont}{vector of contrast weight (numeric).}
 }
 \value{
 a data.frame with k-1 contrast codes, with k=length(cont).
