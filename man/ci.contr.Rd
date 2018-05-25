@@ -18,7 +18,7 @@ ci.contr(cont, d, n, scale = "g", conf.level = 0.95)
 \item{conf.level}{width of the confidence interval, default=.95}
 }
 \value{
-confidence intervals.
+confidence intervals of class "conf.intervals".
 }
 \description{
 Return the confidence intervals computed by scaling the confidence intervals of the noncentrality parameter.

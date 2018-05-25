@@ -23,3 +23,5 @@ n<-round(pp$n)
 res<-power.contr.simulate(5000,n=n,cont = cont,means = m,sd=sp)
 summary.simulations(res)
 
+
+

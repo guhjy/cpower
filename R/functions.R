@@ -30,6 +30,7 @@
 
 
 d.contr<-function(cont,means=NULL,sd=NULL,y=NULL,x=NULL,scale="g") {
+  if (is.null(cont)) stop("contrast weights must be provided")
   .badinput<-"data should be provided either as a vector of means and a pooled sd or as x and y variables"
   if (all(is.null(means),is.null(y),is.null(x)))
        stop(.badinput)
@@ -43,7 +44,11 @@ d.contr<-function(cont,means=NULL,sd=NULL,y=NULL,x=NULL,scale="g") {
     if (is.null(y) | is.null(x))
       stop(.badinput)
     .x<-factor(x)
-    sd<-mean(tapply(y,.x,sd, na.rm=T))
+    n<-tapply(y,.x,length)
+    n<-n-1
+    v<-tapply(y,.x,var)
+    df=sum(n)
+    sd<-sum(v*n)/df
   }
 
   d<-.method0(cont,means,sd)
@@ -124,7 +129,7 @@ test.contr<-function(data,yname,xname,cont,debug=FALSE) {
   form<-as.formula(paste(yname,"~",xname))
   model<-lm(form,data=data)
   ss<-summary(model)
-  ss$coefficients[2,]
+  ss$coefficients[2,]*sum(cont^2)
 }
 
 print.test.contr<-function(obj) {

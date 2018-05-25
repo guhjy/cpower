@@ -15,13 +15,11 @@
 #' @keywords power, contrasts, planned comparisons
 #' @export
 
-
-one.sample<-function(cont,means,sd=1,n=100) {
+one.sample<-function(cont,means,sd=1,n=10) {
 
   y<-rnorm(n*length(cont),mean=means,sd=sd)
   x<-factor(rep(1:length(cont),n))
-  data<-data.frame(cbind(y,x))
-
+  data.frame(cbind(y,x))
 
 }
 
