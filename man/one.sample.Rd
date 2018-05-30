@@ -4,7 +4,7 @@
 \alias{one.sample}
 \title{Return a sample with the specified pattern of means and standard deviation}
 \usage{
-one.sample(cont, means, sd = 1, n = 100)
+one.sample(cont, means, sd = 1, n = 10)
 }
 \arguments{
 \item{cont}{contrast codes as a numeric vector}
