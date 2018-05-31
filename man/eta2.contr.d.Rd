@@ -28,8 +28,22 @@ The parameter \code{scale} controls the method used to scale the effect size d.
     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
    }
 }
+\examples{
+### sim some data
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+y<-rep(means,1000)+rnorm(4000,0,2)
+x<-factor(rep(1:4,1000))
+### compute eta-squared
+mod<-lm(y~x)
+eta2.contr(cont,xname = "x",model = mod)
+
+#### check from the d coefficient
+d<-d.contr(cont,x=x,y=y)
+eta2.contr.d(cont = cont,d=d,scale = "g")
+}
 \seealso{
-\code{\link{cpower}}
+\code{\link[cpower]{eta2.contr}}
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}

@@ -26,9 +26,6 @@ eta-squared.
 \description{
 Compute contrast d from (partial) eta-squared
 }
-\seealso{
-\code{\link{cpower}}
-}
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
 }

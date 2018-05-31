@@ -18,7 +18,7 @@
 #'      The parameter \code{scale} controls the method used to scale the effect size d.
 #'      \enumerate{
 #'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the contrast weigths
 #'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
 #'    }
 #'
@@ -26,7 +26,15 @@
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
 #' @keywords power, contrasts, planned comparisons
 #' @examples
-#' cont<-c()
+#' cont<-c(-3,-1,1,3)
+#' means<-c(10,12,10,12)
+#' d.contr(cont,means = means,sd=2,scale = "g")
+#' ### different scaling
+#' d.contr(cont,means = means,sd=2,scale = "z")
+#' ### raw data
+#' y<-rep(means,1000)+rnorm(4000,0,2)
+#' x<-factor(rep(1:4,1000))
+#' d.contr(cont,y = y,x = x)
 #' @export
 
 
@@ -73,17 +81,27 @@ d.contr<-function(cont,means=NULL,sd=NULL,y=NULL,x=NULL,scale="g") {
 }
 
 
-#' build a custom contrast and k-2 orthogonal ones
+#' Build a custom contrast and k-2 orthogonal ones
 #'
 #' Creates a set of contrast codes that are orthogonal to a given one with the aim of
 #' testing the given contrast in a linear model
 #'
 #' @param cont vector of contrast weight (numeric).
 #'
-#' @return a data.frame with k-1 contrast codes, with k=length(cont).
-#'
+#' @return a data.frame with k-1 contrast codes, with k=length(cont). It can be used to assing contrast weights using \code{\link{contrasts}}
+#' @examples
+#' ### sim some data
+#' cont<-c(-3,-1,1,3)
+#' means<-c(10,12,10,12)
+#' y<-rep(means,1000)+rnorm(4000,0,2)
+#' x<-factor(rep(1:4,1000))
+#' ### assign contrast weights
+#' contrasts(x)<-contr.custom(cont)
+#' contrasts(x)
+#' cor(contr.custom(cont))
+#' summary(lm(y~x))
+
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
 #' @export
 
@@ -107,7 +125,7 @@ contr.custom<-function(cont) {
 
 #' t-test for a custom contrast
 #'
-#' t-test for custom contrast
+#' Perform a t-test for custom contrast
 #'
 #' @param data data.frame containing the variables to be analysed
 #' @param yname name (string) of the dependent variable
@@ -115,22 +133,46 @@ contr.custom<-function(cont) {
 #' @param cont contrast codes as a numeric vector with length=k
 #' @param debug if TRUE, prints out the full model results. If FALSE (default) prints only the contrast results
 #'
-#' @return t-test for the contrast.
+#' @return t-test for the contrast. The \code{Estimate} is the contrast value estimate from the data and the \code{Std. Error} is expressed in the same
+#'         scale of the tstimate.
 #'
+#' @examples
+#' cont<-c(-3,-1,1,3)
+#' means<-c(10,12,10,12)
+#' y<-rep(means,1000)+rnorm(4000,0,10)
+#' x<-rep(1:4,1000)
+#' dat<-as.data.frame(cbind(y,x))
+#' dat$x<-factor(dat$x)
+#'
+#' test.contr(data = dat,cont=cont,yname = "y",xname = "x")
+#'
+#' # check the contrast value
+#' observed<-tapply(dat$y,dat$x,mean)
+#' observed%*%cont
+#'
+#' # check the t-test and p-value
+#' contrasts(dat$x)<-contr.custom(cont)
+#' summary(lm(y~x,data=dat))
+
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
-#' @keywords power, contrasts, planned comparisons
+#' @keywords power, contrasts, planned comparisons, t-test
 #' @export
 
 
-test.contr<-function(data,yname,xname,cont,debug=FALSE) {
+test.contr<-function(yname,xname,data,cont,debug=FALSE) {
   con<-contr.custom(cont)
   data[,xname]<-factor(data[,xname])
   contrasts(data[,xname])<-con
   form<-as.formula(paste(yname,"~",xname))
   model<-lm(form,data=data)
   ss<-summary(model)
-  ss$coefficients[2,]*sum(cont^2)
+  if (debug)
+    return(ss)
+  res<-ss$coefficients[2,]
+  res[1]<-res[1]*sum(cont^2)
+  res[2]<-res[2]*sum(cont^2)
+  res
+
 }
 
 print.test.contr<-function(obj) {
@@ -147,21 +189,23 @@ print(summary.lm(obj))
 #' @param n number of observations per cell
 #' @param sig.level significance level (Type I error probability)
 #' @param power power of test (1 minus Type II error probability)
-#' @param  method used to scale the d index
+#' @param  scale used to scale the d index. It can be "g", "z" or a numeric value
+#' @param type string specifying the type of t test. Can be abbreviated.
+#' @param alternative one- or two-sided test. Can be abbreviated
 #' @return Object of class '"power.htest"', a list of the arguments (including the computed one) augmented with 'method' and 'note' elements.
 #' @details Exactly one of the parameters 'd','n','power'
 #'      and 'sig.level' must be passed as NULL, and that parameter is determined from the others.
+#'
 #'      The parameter \code{scale} controls the method used to scale the effect size d.
 #'      \enumerate{
 #'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the contrast weigths
 #'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
 #'    }
 #'
 #'
 #'
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
 #' @export
 
@@ -187,7 +231,7 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
     if (scale=="g") {
       w<-sum(abs(cont))/2
       d0=d*w
-    } else if (scale=="q") {
+    } else if (scale=="z") {
       d0=d*sqrt(sum(cont^2))
     } else {
       d0=d/scale

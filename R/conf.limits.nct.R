@@ -7,7 +7,7 @@
 # Authors@R: c(person("Ken", "Kelley", role=c("aut", "cre"), email="kkelley@nd.edu"))
 # Maintainer: Ken Kelley <kkelley@nd.edu>
 
-conf.limits.nct <- function(ncp, df, conf.level=.95, alpha.lower=NULL, alpha.upper=NULL, t.value, tol=1e-9, sup.int.warns=TRUE, ...)
+.conf.limits.nct <- function(ncp, df, conf.level=.95, alpha.lower=NULL, alpha.upper=NULL, t.value, tol=1e-9, sup.int.warns=TRUE, ...)
 {
 # Note this function is new in version 4, replacing what was used in prior versions.
 # Internal functions for the noncentral t distribution; two appraoches.

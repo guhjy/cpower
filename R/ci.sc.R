@@ -9,7 +9,7 @@
 # the code has been slightly adjusted for the purposes of the present package
 
 
-ci.sc <- function(means=NULL, s.anova=NULL, c.weights=NULL, n=NULL, N=NULL,
+.ci.sc <- function(means=NULL, s.anova=NULL, c.weights=NULL, n=NULL, N=NULL,
 Psi=NULL, ncp=NULL, conf.level=.95, alpha.lower=NULL, alpha.upper=NULL, df.error=NULL, ...)
 {
 
@@ -66,7 +66,7 @@ alpha.upper <- (1-conf.level)/2
 if(is.null(N)) N=n*length(c.weights)
 if(is.null(df.error)) df.2 <- N - length(c.weights)
 
-Lims <- conf.limits.nct(ncp=lambda, df=df.2, conf.level = NULL, alpha.lower = alpha.lower,
+Lims <- .conf.limits.nct(ncp=lambda, df=df.2, conf.level = NULL, alpha.lower = alpha.lower,
         alpha.upper = alpha.upper, sup.int.warns=TRUE, method = "all", ...)
 
 Result <- list(Lower.Conf.Limit.Standardized.Contrast = Lims$Lower.Limit*part.of.se, Standardized.contrast = psi,

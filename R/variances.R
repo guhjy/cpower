@@ -5,14 +5,28 @@
 #'
 #' @param cont  vector of contrast weights.
 #' @param xname Character string indicating the name of the factor defining groups.
+#' @param model a \code{\link[stats]{lm}} object with \code{xname} as independent variable.
 #'
-#' @return eta-squared.
+#' @return A numeric value for eta-squared.
 #' @description
 #' Return the proportion of variance explained by the contrast over the variance not explained by other effects.
 #' The result is the partial eta-squared unless, there's only one possible contrast in the model, the is the eta-squared
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
-#' @keywords power, contrasts, planned comparisons
+#' @seealso \code{\link[cpower]{eta2.contr.d}}
+#' @examples
+#' ### sim some data
+#' cont<-c(-3,-1,1,3)
+#' means<-c(10,12,10,12)
+#' y<-rep(means,1000)+rnorm(4000,0,2)
+#' x<-factor(rep(1:4,1000))
+#' ### compute eta-squared
+#' mod<-lm(y~x)
+#' eta2.contr(cont,xname = "x",model = mod)
+#'
+#' #### check from the d coefficient
+#' d<-d.contr(cont,x=x,y=y)
+#' eta2.contr.d(cont = cont,d=d,scale = "g")
+#' @keywords power, contrasts, planned comparisons, eta-squared
 #' @export
 
 eta2.contr<-function(cont,xname,model) {
@@ -49,7 +63,21 @@ eta2.contr<-function(cont,xname,model) {
 #' Return the proportion of variance explained by the contrast over the variance not explained by other effects.
 #' The result is the partial eta-squared unless, there's only one possible contrast in the model, the is the eta-squared
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
+#' @seealso \code{\link[cpower]{eta2.contr}}
+#' @examples
+#' ### sim some data
+#' cont<-c(-3,-1,1,3)
+#' means<-c(10,12,10,12)
+#' y<-rep(means,1000)+rnorm(4000,0,2)
+#' x<-factor(rep(1:4,1000))
+#' ### compute eta-squared
+#' mod<-lm(y~x)
+#' eta2.contr(cont,xname = "x",model = mod)
+#'
+#' #### check from the d coefficient
+#' d<-d.contr(cont,x=x,y=y)
+#' eta2.contr.d(cont = cont,d=d,scale = "g")
+
 #' @keywords power, contrasts, planned comparisons
 #' @export
 eta2.contr.d<-function(cont,d,scale="g") {
@@ -75,7 +103,6 @@ eta2.contr.d<-function(cont,d,scale="g") {
 #'    }
 #'
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
 #' @export
 d.contr.eta2<-function(cont,eta2,scale="g") {
@@ -108,7 +135,6 @@ d
 #'    }
 #'
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
 #' @export
 f.contr.d<-function(cont,d,scale="g") {

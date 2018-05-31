@@ -27,9 +27,6 @@ Compute the confidence interval based on the Steiger and Fouladi (1997) method f
 \references{
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval estimation and the evaluation of statistical models. In L. L. E. Harlow, S. A. Mulaik, & J. H. Steiger (Eds.), What if there were no significance tests?: Classic edition. Lawrence Erlbaum Associates Publishers.
 }
-\seealso{
-\code{\link{cpower}}
-}
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
 }

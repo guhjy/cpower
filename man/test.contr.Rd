@@ -18,18 +18,35 @@ test.contr(data, yname, xname, cont, debug = FALSE)
 \item{debug}{if TRUE, prints out the full model results. If FALSE (default) prints only the contrast results}
 }
 \value{
-t-test for the contrast.
+t-test for the contrast. The \code{Estimate} is the contrast value estimate from the data and the \code{Std. Error} is expressed in the same
+        scale of the tstimate.
 }
 \description{
 t-test for custom contrast
 }
-\seealso{
-\code{\link{cpower}}
+\examples{
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+y<-rep(means,1000)+rnorm(4000,0,10)
+x<-rep(1:4,1000)
+dat<-as.data.frame(cbind(y,x))
+dat$x<-factor(dat$x)
+
+test.contr(data = dat,cont=cont,yname = "y",xname = "x")
+
+# check the contrast value
+observed<-tapply(dat$y,dat$x,mean)
+observed\%*\%cont
+
+# check the t-test and p-value
+contrasts(dat$x)<-contr.custom(cont)
+summary(lm(y~x,data=dat))
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
 }
-\keyword{comparisons}
+\keyword{comparisons,}
 \keyword{contrasts,}
 \keyword{planned}
 \keyword{power,}
+\keyword{t-test}

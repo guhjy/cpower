@@ -27,9 +27,6 @@ The parameter \code{scale} controls the method used to scale the effect size d.
     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
    }
 }
-\seealso{
-\code{\link{cpower}}
-}
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
 }

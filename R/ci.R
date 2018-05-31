@@ -14,18 +14,24 @@
 #'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
 #'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
 #'    }
-#'      The confidence intervals are computed based on selected function in \code{\link{MBESS}}:
+#'      The confidence intervals are computed based on selected function in \code{MBESS}:
 #'      in particular \code{\link[MBESS]{conf.limits.nct}} and \code{\link[MBESS]{ci.sc}}. Results are scaled to the
 #'      standardized effect size required.
 
 #' @return confidence intervals of class "conf.intervals".
 #' @description Return the confidence intervals computed by scaling the confidence intervals of the noncentrality parameter.
-#' The confidence intervals are computed based on selected function in \code{\link{MBESS}}
+#' The confidence intervals are computed based on selected function in \code{MBESS}.
 #' @references
 #' Kelley, K. (2007). Confidence intervals for standardized effect sizes: Theory, application, and implementation. Journal of Statistical Software, 20 (8), 1–24.
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
+#' @examples
+#'
+#' cont<-c(-3,-1,1,3)
+#' means<-c(10,12,10,12)
+#' d<-d.contr(cont,means = means,sd=2,scale = "g")
+#' ci.contr(cont,d=d,scale = "g",n=100)
+#'
 #' @export
 #'
 #'
@@ -62,7 +68,6 @@ ci.contr<-function(cont,d,n,scale="g",conf.level=.95) {
 #' @references
 #'   Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval estimation and the evaluation of statistical models. In L. L. E. Harlow, S. A. Mulaik, & J. H. Steiger (Eds.), What if there were no significance tests?: Classic edition. Lawrence Erlbaum Associates Publishers.
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
 #' @export
 #'
@@ -100,11 +105,13 @@ ci.ncpt<-function(ncp,k,n,conf.level=.95) {
 #' @param obj  an object of class "conf.intervals"
 
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
+#' @seealso \code{\link[cpower]{ci.contr}}
 #' @keywords power, contrasts, planned comparisons
 #' @export
 #'
 #'
+print <- function(obj) UseMethod("print")
+
 print.conf.intervals<-function(obj) {
   alpha<-attr(obj,"conf.level")
   center<-attr(obj,"param")

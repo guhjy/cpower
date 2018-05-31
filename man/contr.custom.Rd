@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{contr.custom}
 \alias{contr.custom}
-\title{build a custom contrast and k-2 orthogonal ones}
+\title{Build a custom contrast and k-2 orthogonal ones}
 \usage{
 contr.custom(cont)
 }
@@ -10,14 +10,23 @@ contr.custom(cont)
 \item{cont}{vector of contrast weight (numeric).}
 }
 \value{
-a data.frame with k-1 contrast codes, with k=length(cont).
+a data.frame with k-1 contrast codes, with k=length(cont). It can be used to assing contrast weights using \code{\link{contrasts}}
 }
 \description{
 Creates a set of contrast codes that are orthogonal to a given one with the aim of
 testing the given contrast in a linear model
 }
-\seealso{
-\code{\link{cpower}}
+\examples{
+### sim some data
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+y<-rep(means,1000)+rnorm(4000,0,2)
+x<-factor(rep(1:4,1000))
+### assign contrast weights
+contrasts(x)<-contr.custom(cont)
+contrasts(x)
+cor(contr.custom(cont))
+summary(lm(y~x))
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}

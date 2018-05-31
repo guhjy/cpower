@@ -10,9 +10,11 @@ eta2.contr(cont, xname, model)
 \item{cont}{vector of contrast weights.}
 
 \item{xname}{Character string indicating the name of the factor defining groups.}
+
+\item{model}{a \code{\link[stats]{lm}} object with \code{xname} as independent variable.}
 }
 \value{
-eta-squared.
+A numeric value for eta-squared.
 }
 \description{
 Return the proportion of variance explained by the contrast over the variance not explained by other effects.
@@ -22,13 +24,28 @@ The result is the partial eta-squared unless, there's only one possible contrast
 Compute the eta-squared for a contrast based on a model already estimated with the effect of
 "xname" af a factor.
 }
+\examples{
+### sim some data
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+y<-rep(means,1000)+rnorm(4000,0,2)
+x<-factor(rep(1:4,1000))
+### compute eta-squared
+mod<-lm(y~x)
+eta2.contr(cont,xname = "x",model = mod)
+
+#### check from the d coefficient
+d<-d.contr(cont,x=x,y=y)
+eta2.contr.d(cont = cont,d=d,scale = "g")
+}
 \seealso{
-\code{\link{cpower}}
+\code{\link[cpower]{eta2.contr.d}}
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
 }
-\keyword{comparisons}
+\keyword{comparisons,}
 \keyword{contrasts,}
+\keyword{eta-squared}
 \keyword{planned}
 \keyword{power,}

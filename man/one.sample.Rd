@@ -22,8 +22,10 @@ a data.frame with all the simulated results of class simulations
 Simulates samples based on normal distribution and test the contrast for each sample, providing
 power information
 }
-\seealso{
-\code{\link{cpower}}
+\examples{
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+one.sample(cont,means,sd=1,n=10)
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}

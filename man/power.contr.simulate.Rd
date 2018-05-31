@@ -2,11 +2,13 @@
 % Please edit documentation in R/sims.R
 \name{power.contr.simulate}
 \alias{power.contr.simulate}
-\title{Compute power based on simulations}
+\title{Compute power based on simulation}
 \usage{
 power.contr.simulate(rep, cont, n, means, sd = 1)
 }
 \arguments{
+\item{rep}{number of simulations to run}
+
 \item{cont}{contrast codes as a numeric vector}
 
 \item{n}{per cell n}
@@ -22,8 +24,14 @@ a data.frame with all the simulated results of class simulations
 Simulates samples based on normal distribution and test the contrast for each sample, providing
 power information
 }
-\seealso{
-\code{\link{cpower}}
+\examples{
+
+## check actual power with 10 simulations
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+pwr<-power.contr.simulate(10,cont,10,means,sd=1)
+mean(pwr$`Pr(>|t|)`>=.05)
+
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}

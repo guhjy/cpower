@@ -36,12 +36,20 @@ data to compute the d index can be either actual data or a vector of means and a
      The parameter \code{scale} controls the method used to scale the effect size d.
      \enumerate{
     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
-    \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+    \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the contrast weigths
     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
    }
 }
 \examples{
-cont<-c()
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+d.contr(cont,means = means,sd=2,scale = "g")
+### different scaling
+d.contr(cont,means = means,sd=2,scale = "z")
+### raw data
+y<-rep(means,1000)+rnorm(4000,0,2)
+x<-factor(rep(1:4,1000))
+d.contr(cont,y = y,x = x)
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
