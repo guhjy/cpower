@@ -40,8 +40,8 @@ data to compute the d index can be either actual data or a vector of means and a
     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
    }
 }
-\seealso{
-\code{\link{cpower}}
+\examples{
+cont<-c()
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}

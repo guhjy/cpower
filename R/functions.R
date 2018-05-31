@@ -24,8 +24,9 @@
 #'
 #'
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
-#' @seealso \code{\link{cpower}}
 #' @keywords power, contrasts, planned comparisons
+#' @examples
+#' cont<-c()
 #' @export
 
 
@@ -48,7 +49,7 @@ d.contr<-function(cont,means=NULL,sd=NULL,y=NULL,x=NULL,scale="g") {
     n<-n-1
     v<-tapply(y,.x,var)
     df=sum(n)
-    sd<-sum(v*n)/df
+    sd<-sqrt(sum(v*n)/df)
   }
 
   d<-.method0(cont,means,sd)

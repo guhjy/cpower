@@ -1,4 +1,24 @@
+### examples
+##### d.cont ###
+cont<-c(-3,-1,1,3)
+means<-c(10,12,10,12)
+cont%*%means/sum(abs(cont))
+d.contr(cont,means = means,sd=2,scale = "g")
+### different scaling
+d.contr(cont,means = means,sd=2,scale = "z")
+
+### raw data
+y<-rep(means,100)+rnorm(400,0,2)
+x<-factor(rep(1:4,100))
+m<-tapply(y,x,mean)
+cont%*%m/sum(abs(cont))
+ss<-tapply(y,x,sd)
+
+d.contr(cont,y = y,x = x)
+
+
 ### some try ###########
+library(cpower)
 power.t.test(n=10,delta=1)
 power.contrast.t(cont=c(1,-1),d=1,n=10)
 
