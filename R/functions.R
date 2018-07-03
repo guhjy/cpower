@@ -159,7 +159,7 @@ contr.custom<-function(cont) {
 #' @export
 
 
-test.contr<-function(yname,xname,data,cont,debug=FALSE) {
+test.contr<-function(data,yname,xname,cont,debug=FALSE) {
   con<-contr.custom(cont)
   data[,xname]<-factor(data[,xname])
   contrasts(data[,xname])<-con
