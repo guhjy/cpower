@@ -22,7 +22,7 @@ t-test for the contrast. The \code{Estimate} is the contrast value estimate from
         scale of the tstimate.
 }
 \description{
-t-test for custom contrast
+Perform a t-test for custom contrast
 }
 \examples{
 cont<-c(-3,-1,1,3)
