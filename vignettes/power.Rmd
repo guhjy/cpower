@@ -112,7 +112,7 @@ pq<-power.contrast.t(cont = quad,d=dgq, power = .80,scale = "g")
 
 The function `power.contrast.t` works as standard `power.t.test` function. It accept exactly one NULL value for `n`,`d`,`power`, and `sig.level`. The last parameter is by default equal to .05. One can also specify if the test is directional with the parameter `alternative = c("two.sided", "one.sided")`. Default is `two.sided`. In the example, to achieve .80 power for the linear contrast test `round(pl$n)` participants per cell are required, and `round(pq$n)` for the quadratic contrast test.
 
-## Other application of power analysis
+## Other applications of power analysis
 
 By passing as `NULL` one of the parameters `n`,`d`,`power`, and `sig.level` one can obtain the missing parameter of the power functions. Thus, if a researchers needs post-hoc power, the `n` (number of cases per cell) should be assigned and `power` should be set to NULL. If the previous effect sizes were observed in a study with 15 participants per cell, the achieved power would be, for the linear and the quadratic contrast test, respectively:
 
