@@ -126,15 +126,26 @@ contr.custom<-function(cont) {
 #' t-test for a custom contrast
 #'
 #' Perform a t-test for custom contrast
-#'
+#' @param cont contrast codes as a numeric vector with length=k
+#' @param d effect size index to test
+#' @param n total sample size required if d is provided
+#' @param scale scaling method used to compute d. Required if d is provided
 #' @param data data.frame containing the variables to be analysed
 #' @param yname name (string) of the dependent variable
 #' @param xname name (string) of the independent variable with k-groups, with k being length(cont)
-#' @param cont contrast codes as a numeric vector with length=k
-#' @param debug if TRUE, prints out the full model results. If FALSE (default) prints only the contrast results
 #'
 #' @return t-test for the contrast. The \code{Estimate} is the contrast value estimate from the data and the \code{Std. Error} is expressed in the same
-#'         scale of the tstimate.
+#'         scale of the estimate. It is assumed that the cells have the same size.
+#' @details The test can be performed either on raw data on a d coefficient. When \code{d} is provided, also the total sample size \code{n}
+#'          and the scaling method \code{scale} should be provided.
+#'
+#'      The parameter \code{scale} controls the method used to scale the effect size d.
+#'      \enumerate{
+#'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
+#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the contrast weigths
+#'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
+#'    }
+
 #'
 #' @examples
 #' cont<-c(-3,-1,1,3)
@@ -159,25 +170,40 @@ contr.custom<-function(cont) {
 #' @export
 
 
-test.contr<-function(data,yname,xname,cont,debug=FALSE) {
-  con<-contr.custom(cont)
-  data[,xname]<-factor(data[,xname])
-  contrasts(data[,xname])<-con
-  form<-as.formula(paste(yname,"~",xname))
-  model<-lm(form,data=data)
-  ss<-summary(model)
-  if (debug)
-    return(ss)
-  res<-ss$coefficients[2,]
-  res[1]<-res[1]*sum(cont^2)
-  res[2]<-res[2]*sum(cont^2)
-  res
+test.contr<-function(cont,d=NULL,n=NULL,scale=NULL,y=NULL,x=NULL) {
+  if (is.null(d)) {
+     if (is.null(y) | is.null(y))
+        stop("Either d or y and x vectors should be provided")
+      con<-contr.custom(cont)
+      x<-factor(x)
+      contrasts(x)<-con
+      form<-as.formula(y~x)
+      model<-lm(form)
+      ss<-summary(model)
+      res<-ss$coefficients[2,]
+      res[1]<-res[1]*sum(cont^2)
+      res[2]<-res[2]*sum(cont^2)
+     return(res)
+  }
+  if (is.null(y) & is.null(x)) {
+    if (is.null(d))
+      stop("Either d or y and x vectors should be provided")
+    if (is.null(n))
+      stop("When d is provided, also the total sample size n is required")
+    if (is.null(scale))
+      stop("When d is provided, also the scaling method is required")
+   k<-length(cont)
+   d0<-.tod0(cont,d,scale)
+   dz<-.fromd0(cont,d0,"z")
+   ttest<-sqrt(n/k)*dz
+   p<-2*pt(-abs(ttest),df=n-k)
+   return(c(d=d,"t value"=ttest,"Pr(>|t|)" =p))
+  }
+
+ stop("Either d or x and y vectors should be provided")
 
 }
 
-print.test.contr<-function(obj) {
-print(summary.lm(obj))
-}
 
 
 #' power function for contrasts
@@ -211,6 +237,7 @@ print(summary.lm(obj))
 
 power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.level=0.05,type="between",alternative=c("two.sided","one.sided")) {
 
+  tol = .Machine$double.eps^0.25
   .ncp<-NULL
   NOTE<-""
   if (!is.numeric(cont))
@@ -240,14 +267,12 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
 
   k=length(cont)
   ss<-sum(cont^2)
-  alpha<-sig.level
-
 
   p.body <-
         quote({
           .ncp<-sqrt(n/ss)*d0
           np<-(n-1)*k
-          crit<-qt(alpha/tside,np,lower.tail = F)
+          crit<-qt(sig.level/tside,np,lower.tail = F)
           pt(crit, np, ncp = .ncp, lower.tail = FALSE) +  pt(-crit, np, ncp = .ncp, lower.tail = TRUE)
       })
 
@@ -260,6 +285,9 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
   if (is.null(d))
     d <- uniroot(function(d0) eval(p.body) - power,
                       c(1e-07, 1e+07), extendInt = "upX")$root
+
+  if (is.null(sig.level))
+       sig.level <- uniroot(function(sig.level) eval(p.body) - power, c(1e-10, 1 - 1e-10), tol = tol, extendInt = "yes")$root
 
   NOTE <- switch(type, paired = "n is number of *pairs*, sd is std.dev. of *differences* within pairs",
                  two.sample = "n is number in *each* group", NULL)
@@ -285,15 +313,15 @@ power.contrast.t<-function(cont=NULL,d=NULL,n=NULL,power=NULL,scale="g",sig.leve
 
 .tod0<-function(cont,d,scale) {
   if (scale=="g") {
-    w<-sum(abs(cont))/2
-    d0=d*w
-  } else if (scale=="z") {
-    d0=d*sqrt(sum(cont^2))
-  } else {
-    d0=d/scale
+    w<-2/sum(abs(cont))
+    return(d/w)
   }
-d0
+  if (scale=="z")
+      return(d*sqrt(sum(cont^2)))
+  return(d0/scale)
 }
+
+
 .fromd0<-function(cont,d0,scale) {
   if (scale=="g") {
     w<-2/sum(abs(cont))

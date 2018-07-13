@@ -1,0 +1,188 @@
+---
+title: "Estimating power for contrast tests"
+author: "Marcello Gallucci"
+date: "`r Sys.Date()`"
+output: 
+   rmarkdown::html_vignette:
+      
+
+bibliography: contrasts.bib
+
+vignette: >
+  %\VignetteIndexEntry{Estimating power for contrast tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+
+```
+
+
+# Background
+
+## Contrasts 
+
+A contrast is a linear combination of means whose coefficients sum up to zero, meant to estimate a particular comparison of means and test it against zero. We refer to the contrast set of coefficients as $\boldsymbol{c}=\{c_i\}$, and to the expected set of means as $\boldsymbol{\mu}=\{\mu_i\}$. The contrast coefficients (weights) are chosen such that $\sum_i{c_i}=0$, with $i=\{1,..,k\}$ where $k$ is the number of means being compared. The contrast expected value is $c\mu=\sum_i{(c_i \cdot \mu_i)}$. As an example, consider a simple design with two groups: the comparison of the two groups means can be carried out with a simple contrast with $\boldsymbol{c}=\{1,-1\}$, in which the contrast value is simply the expected difference between means, $c\mu=c_1\mu_1+c_2\mu_2=\mu_1-\mu_2$.  
+
+## Cohen's $\delta$ measures for contrasts
+
+@cohen1988 defines several indices of effect size for the comparison of two means. In the context of two-groups designs, he defines:
+$$\delta={{\mu_1-\mu_2} \over \sigma} $$ 
+When the same logic is applied to a contrast comparison, it naturally generalizes to [cf. @steiger2004beyond, p. 173, EQ 46] 
+
+$$\delta_0={\sum{(c_i \cdot \mu_i)} \over \sigma} $$ 
+
+The only constraint one has on the weights $c_i$ is that $\sum{c_i}=0$. Because we poses no constraint to the weights, the standardized index needs to be scaled [@gallucci2018constrasts]. Here we are interested in the _g-method_.  
+
+
+### g-method
+
+A different method of scaling the constrat effect size measure which guarantees better interpretability and comparability can be suggested. Let's $g={2 \over \sum_i{\left|{c_i}\right|}}$, where $|c_i|$ indicates the absolute value of $c_i$, then  
+
+$$\delta_g=g \cdot \delta_0={2 \over \sum{|{c_i}|}} \cdot {{\sum_i{c_i \cdot \mu_i}} \over  {\sigma }}$$
+To be able to distinguish different effect size conceptualizations, we shall denote this measure of contrast effect size as $\delta_g$ and refer to it as computed with the g-method, for short. This method of scaling is equivalent to constraining the contrast weights such that $\sum{|c_i|}=2$, as suggested by some authors [@lai2012accuracy; @mbess]. Thus, effect size indexes scaled with the g-method are in the same scale of indexes computed with such a constraint.
+
+
+# Power
+
+## Prospective power analysis
+
+Let assume that based on previous research the researcher expects the following mean pattern in a four cells design, with pooled standard deviation $\sigma=10$. The researcher wishes to compute the required $n$ (participants per cell) in order to test a linear and a quadratic contrast with power equal to .80. Data are reported in Table \ref{tab:x4}. 
+
+```{r echo=TRUE, results='hide'}
+m<-c(8,16,18,19) ## means
+sp<-10
+
+```
+
+
+```{r,results='asis', echo=FALSE}
+linear<-c(-3,-1,1,3)
+quad<-c(-1,1,1,-1)
+k<-length(linear)
+options(xtable.comment = FALSE)
+options("digits"=3)
+tabdata<-data.frame(m,linear,quad)
+tab<-t(tabdata)
+colnames(tab)<-paste("grp",1:k,sep="")
+rownames(tab)<-c("Mean","Linear","Quadratic")
+library(xtable)
+xt<-xtable(tab,
+       caption="Means and contrast weights for the four groups example",
+       label="tab:x4",
+       align = c("l","c","c","c","c"))
+print.xtable(xt,type="html")
+```
+
+First, the researcher can compute the effect size index based on the expected means and standard deviation for the two contrasts.
+
+```{r,results='markup'}
+library(cpower)
+### define the contrasts weights
+linear<-c(-3,-1,1,3)
+quad<-c(-1,1,1,-1)
+sp<-10 ## expected pooled standard deviation
+#### effect size
+(dgl<-d.contr(linear,means = m,sd=sp,scale = "g"))
+(dgq<-d.contr(quad,means = m,sd=sp,scale = "g"))
+
+```
+
+Then the researcher can compute the power based on the t-test. 
+
+```{r,results='markup'}
+
+power.contrast.t(cont = linear,d=dgl, power = .80,scale = "g")
+power.contrast.t(cont = quad,d=dgq, power = .80,scale = "g")
+
+```
+
+```{r,results='hide',echo=FALSE}
+
+pl<-power.contrast.t(cont = linear,d=dgl, power = .80,scale = "g")
+pq<-power.contrast.t(cont = quad,d=dgq, power = .80,scale = "g")
+
+```
+
+The function `power.contrast.t` works as standard `power.t.test` function. It accept exactly one NULL value for `n`,`d`,`power`, and `sig.level`. The last parameter is by default equal to .05. One can also specify if the test is directional with the parameter `alternative = c("two.sided", "one.sided")`. Default is `two.sided`. In the example, to achieve .80 power for the linear contrast test `round(pl$n)` participants per cell are required, and `round(pq$n)` for the quadratic contrast test.
+
+## Other application of power analysis
+
+By passing as `NULL` one of the parameters `n`,`d`,`power`, and `sig.level` one can obtain the missing parameter of the power functions. Thus, if a researchers needs post-hoc power, the `n` (number of cases per cell) should be assigned and `power` should be set to NULL. If the previous effect sizes were observed in a study with 15 participants per cell, the achieved power would be, for the linear and the quadratic contrast test, respectively:
+
+```{r,results='markup'}
+
+power.contrast.t(cont = linear,d=dgl,n=15,scale = "g")
+power.contrast.t(cont = quad,d=dgq, n=15,scale = "g")
+
+```
+
+If the `d` parameter is NULL, one can compute the minimum effect size that would achieve a power of .80.
+
+```{r,results='markup'}
+
+power.contrast.t(cont = linear,power = .80,n=15,scale = "g")
+power.contrast.t(cont = quad,power = .80, n=15,scale = "g")
+
+```
+
+Finally, by passing `sig.level=NULL`, one can compute the smallest p-value one will obtain with power .80, given the effect size and the sample size.
+
+```{r,results='markup'}
+
+power.contrast.t(cont = linear,d=dgl,n=15,power=.80,sig.level=NULL,scale = "g")
+power.contrast.t(cont = quad,d=dgq, n=15,power=.80,sig.level=NULL,scale = "g")
+
+```
+
+## Convergence with other power functions
+
+Assume now the design has two means. The $\delta_g$ index is equivalent to Cohen's d [@cohen1988]. We now show that in this case the results of `power.contrast.t` are equivalent to the results of `stats::power.t.test`. Assume the researcher expects Cohen's $\delta=1.2$. 
+
+```{r,results='markup'}
+weights<-c(-1,1)
+power.contrast.t(cont = weights,d=1.5, power = .80,scale = "g")
+
+power.t.test(delta = 1.5,power = .80)
+
+```
+
+Results are identical.
+
+## Convergence with Montecarlo simulations
+
+`cpower` package provides a simple function to obtain power estimation based on simulated sample. The function can be useful to check other function accuracy. It can be used to computed post-hoc power, that is estimating power given an effect size and a cell size. 
+
+
+```{r,results='markup'}
+### expected data
+m<-c(8,16,18,19) ## means
+sp<-10
+
+### large sample test based power 
+power.contrast.t(cont = linear,d=dgl,n=15,scale = "g")
+
+### simulation based power (remove comment to run)
+#pw<-power.contr.simulate(rep=5000,linear,15,means = m,sd = sp)
+#summary(pw)
+
+```
+
+We can see that they results converge quite precisely.
+
+
+# Scaling with z-method
+
+A different method to scale the unscaled index is to divide the contrast value by the square root of the contrast weights sum of squares [@wahlsten1991sample;@liu2013power; @steiger1997noncentrality, @lai2012accuracy]. The population effect size index is:
+$$\delta_z={\sum{(c_i \cdot \mu_i)} \over {\sigma \sqrt{\sum{c_i^2}}}} $$
+
+All the commands discussed above can be used with this scaling method by passing the parameter `scale="z"`.
+
+
+## References

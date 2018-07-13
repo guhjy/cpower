@@ -1,7 +1,7 @@
 Package: cpower
 Type: Package
 Title: Power analysis for contrasts
-Version: 0.3.0
+Version: 0.4.0
 Author: Marcello Gallucci
 Maintainer: Marcello Gallucci <mcfanda@gmail.com>
 Description: 

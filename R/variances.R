@@ -123,7 +123,7 @@ d
 #'
 #'
 #' @param cont  vector of contrast weights.
-#' @param d eta-squared coefficient for given contrast.
+#' @param d d coefficient for given contrast.
 #' @param scale method to scale d.
 #' @return f.
 #' @details
@@ -139,6 +139,32 @@ d
 #' @export
 f.contr.d<-function(cont,d,scale="g") {
   d0<-.tod0(cont,d,scale)
-  (d0/sqrt(sum(cont^2)))/2
+  dz<-.fromd0(cont,d0,"z")
+  abs(dz)/sqrt(length(cont))
+}
+
+
+#' Compute contrast d from f
+#'
+#'
+#' @param cont  vector of contrast weights.
+#' @param f f coefficient for given contrast.
+#' @param scale method to scale d.
+#' @return f.
+#' @details
+#'      The parameter \code{scale} controls the method used to scale the effect size d.
+#'      \enumerate{
+#'     \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
+#'     \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the coefficients
+#'     \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
+#'    }
+#'
+#' @author Marcello Gallucci, \email{mcfanda@gmail.com}
+#' @keywords power, contrasts, planned comparisons
+#' @export
+d.contr.f<-function(cont,f,scale="g") {
+  dz<-f*sqrt(length(cont))
+  d0<-.tod0(cont,dz,"z")
+  .fromd0(cont,d0,scale)
 }
 

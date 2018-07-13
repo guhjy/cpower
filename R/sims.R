@@ -57,7 +57,7 @@ res<-replicate(rep, {
   y<-rnorm(n*length(cont),mean=means,sd=sd)
   x<-factor(rep(1:length(cont),n))
   data<-data.frame(cbind(y,x))
-  test.contr(data,"y","x",cont)
+  test.contr(cont,y=y,x=x)
 },simplify = T)
 res<-as.data.frame(t(rbind(res)))
 class(res)<-c("simulations","data.frame")

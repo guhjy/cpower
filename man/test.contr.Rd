@@ -4,25 +4,40 @@
 \alias{test.contr}
 \title{t-test for a custom contrast}
 \usage{
-test.contr(data, yname, xname, cont, debug = FALSE)
+test.contr(cont, d = NULL, n = NULL, scale = NULL, y = NULL, x = NULL)
 }
 \arguments{
+\item{cont}{contrast codes as a numeric vector with length=k}
+
+\item{d}{effect size index to test}
+
+\item{n}{total sample size required if d is provided}
+
+\item{scale}{scaling method used to compute d. Required if d is provided}
+
 \item{data}{data.frame containing the variables to be analysed}
 
 \item{yname}{name (string) of the dependent variable}
 
 \item{xname}{name (string) of the independent variable with k-groups, with k being length(cont)}
-
-\item{cont}{contrast codes as a numeric vector with length=k}
-
-\item{debug}{if TRUE, prints out the full model results. If FALSE (default) prints only the contrast results}
 }
 \value{
 t-test for the contrast. The \code{Estimate} is the contrast value estimate from the data and the \code{Std. Error} is expressed in the same
-        scale of the tstimate.
+        scale of the estimate. It is assumed that the cells have the same size.
 }
 \description{
 Perform a t-test for custom contrast
+}
+\details{
+The test can be performed either on raw data on a d coefficient. When \code{d} is provided, also the total sample size \code{n}
+         and the scaling method \code{scale} should be provided.
+
+     The parameter \code{scale} controls the method used to scale the effect size d.
+     \enumerate{
+    \item    \code{scale="g"} assumes scaling by dividing 2*d by the sum of absolute coefficients
+    \item    \code{scale="z"} assumes scaling by dividing d by the square-root of the sum of squares of the contrast weigths
+    \item    \code{numeric} any constant that multiplies the unscaled d to obtain the scaled d
+   }
 }
 \examples{
 cont<-c(-3,-1,1,3)

@@ -1,10 +1,15 @@
 ---
-title: "Computing standardized mean difference indexes"
+title: "Computing and testing standardized mean difference indexes"
 author: "Marcello Gallucci"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+   rmarkdown::html_vignette:
+      
+
+bibliography: contrasts.bib
+
 vignette: >
-  %\VignetteIndexEntry{Computing standardized mean difference indexes}
+  %\VignetteIndexEntry{Computing and testing standardized mean difference indexes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,8 +19,190 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+
 ```
 
 
-## Intro
+# Background
 
+## Contrasts 
+
+A contrast is a linear combination of means whose coefficients sum up to zero, meant to estimate a particular comparison of means and test it against zero. We refer to the contrast set of coefficients as $\boldsymbol{c}=\{c_i\}$, and to the expected set of means as $\boldsymbol{\mu}=\{\mu_i\}$. The contrast coefficients (weights) are chosen such that $\sum_i{c_i}=0$, with $i=\{1,..,k\}$ where $k$ is the number of means being compared. The contrast expected value is $c\mu=\sum_i{(c_i \cdot \mu_i)}$. As an example, consider a simple design with two groups: the comparison of the two groups means can be carried out with a simple contrast with $\boldsymbol{c}=\{1,-1\}$, in which the contrast value is simply the expected difference between means, $c\mu=c_1\mu_1+c_2\mu_2=\mu_1-\mu_2$.  
+
+## Cohen's $\delta$ measures for contrasts
+
+@cohen1988 defines several indices of effect size for the comparison of two means. In the context of two-groups designs, he defines:
+$$\delta={{\mu_1-\mu_2} \over \sigma} $$ 
+When the same logic is applied to a contrast comparison, it naturally generalizes to [cf. @steiger2004beyond, p. 173, EQ 46] 
+
+$$\delta_0={\sum{(c_i \cdot \mu_i)} \over \sigma} $$ 
+
+The only constraint one has on the weights $c_i$ is that $\sum{c_i}=0$. Because we poses no constraint to the weights, the standardized index needs to be scaled [@gallucci2018constrasts]. Two scaling method are of interested here: the _z-method_ and the _g-method_.  
+
+### z-method
+
+The first method to scale the unscaled index is to divide the contrast value by the square root of the contrast weights sum of squares [@wahlsten1991sample;@liu2013power; @steiger1997noncentrality, @lai2012accuracy]. The population effect size index is:
+$$\delta_z={\sum{(c_i \cdot \mu_i)} \over {\sigma \sqrt{\sum{c_i^2}}}} $$
+Although the method employs a normalization of the weights, we refer to it method as the z-method and to the effect size measure as $\delta_z$, because it essentially entails as sort of standardization of the contrast weights.
+
+### g-method
+
+A different method of scaling the constrat effect size measure which guarantees better interpretability and comparability can be suggested. Let's $g={2 \over \sum_i{\left|{c_i}\right|}}$, where $|c_i|$ indicates the absolute value of $c_i$, then  
+
+$$\delta_g=g \cdot \delta_0={2 \over \sum{|{c_i}|}} \cdot {{\sum_i{c_i \cdot \mu_i}} \over  {\sigma }}$$
+To be able to distinguish different effect size conceptualizations, we shall denote this measure of contrast effect size as $\delta_g$ and refer to it as computed with the g-method, for short. This method of scaling is equivalent to constraining the contrast weights such that $\sum{|c_i|}=2$, as suggested by some authors [@lai2012accuracy; @mbess]. Thus, effect size indexes scaled with the g-method are in the same scale of indexes computed with such a constraint.
+
+
+# Computation
+
+## Example
+```{r echo=TRUE, results='hide'}
+#### generate same data ######
+n<-30
+m<-c(8,16,18,19) ## means
+
+ss<-c(7,7.5,7.4,7) ## standard deviations
+
+k<-length(m)
+y1<-rnorm(n)
+y1<-m[1]+(((y1-mean(y1))/sd(y1))*ss[1])
+y2<-rnorm(n)
+y2<-m[2]+(((y2-mean(y2))/sd(y2))*ss[2])
+y3<-rnorm(n)
+y3<-m[3]+(((y3-mean(y3))/sd(y3))*ss[3])
+y4<-rnorm(n)
+y4<-m[4]+(((y4-mean(y4))/sd(y4))*ss[4])
+y<-c(y1,y2,y3,y4)
+grp<-rep(1:4,each=n)
+data<-as.data.frame(cbind(y,grp))
+data$grp<-factor(data$grp)
+
+
+```
+
+Imagine a four groups design [@gallucci2018constrasts], with `r n` participants in each group and each group representing an increasing level of a manipulated stimulus. The response to the stimulus has been recorded for each participant on a continuous scale. Data are reported in Table \ref{tab:x4}. 
+
+```{r,results='asis', echo=FALSE}
+linear<-c(-3,-1,1,3)
+quad<-c(-1,1,1,-1)
+
+options(xtable.comment = FALSE)
+options("digits"=3)
+tabdata<-data.frame(m,ss,linear,quad)
+tab<-t(tabdata)
+colnames(tab)<-paste("grp",1:k,sep="")
+rownames(tab)<-c("Mean","SD","Linear","Quadratic")
+library(xtable)
+xt<-xtable(tab,
+       caption="Means, standard deviations and contrast weights for the four groups example",
+       label="tab:x4",
+       align = c("l","c","c","c","c"))
+print(xt,type="html")
+```
+
+
+
+
+## From means and standard deviations
+
+Here we assume that we only have acccess to the aggregate data (means and standard deviations). To compute the effect sizes and their confidence intervals, we simply run the following code.
+
+```{r,results='markup'}
+library(cpower)
+### define the contrasts weights
+linear<-c(-3,-1,1,3)
+quad<-c(-1,1,1,-1)
+sp<-sqrt(sum(ss^2)/k)
+#### g-method
+(dgl<-d.contr(linear,means = m,sd=sp,scale = "g"))
+ci.contr(cont = linear,d = dgl,n = n,scale = "g")
+
+(dgq<-d.contr(quad,means = m,sd=sp,scale = "g"))
+ci.contr(cont = quad,d = dgq,n = n,scale = "g")
+
+#### z-method
+(dzl<-d.contr(linear,means = m,sd=sp,scale = "z"))
+ci.contr(cont = linear,d = dzl,n = n,scale = "z")
+(dzq<-d.contr(quad,means = m,sd=sp,scale = "z"))
+ci.contr(cont = quad,d = dzq,n = n,scale = "z")
+
+
+
+```
+
+We can  also test for significance the contrasts. We need to specify the `d`, the total sample size using `n` and the scaling method `scale`.
+
+```{r,results='markup'}
+
+### g-method
+test.contr(linear,d=dgl,n=n*k,scale="g")
+test.contr(quad,d=dgq,n=n*k,scale="g")
+
+### z-method
+test.contr(linear,d=dgl,n=n*k,scale="z")
+test.contr(quad,d=dgq,n=n*k,scale="z")
+
+```
+
+## From raw data
+
+The same results can be otained using the raw data. In this case, we need the vectors of data for the dependent variable and the factor that specifies the groups. 
+
+```{r,results='markup'}
+### define the contrasts weights
+linear<-c(-3,-1,1,3)
+quad<-c(-1,1,1,-1)
+
+#### g-method
+(dgl<-d.contr(linear,y = data$y,x=data$grp ,scale = "g"))
+ci.contr(cont = linear,d = dgl,n = n,scale = "g")
+
+(dql<-d.contr(quad,y = data$y,x=data$grp ,scale = "g"))
+ci.contr(cont = quad,d = dgq,n = n,scale = "g")
+
+#### z-method
+(dzl<-d.contr(linear,y = data$y,x=data$grp ,scale = "z"))
+ci.contr(cont = linear,d = dzl,n = n,scale = "z")
+(dzq<-d.contr(quad,y = data$y,x=data$grp ,scale = "z"))
+ci.contr(cont = quad,d = dzq,n = n,scale = "z")
+
+## test for significance 
+test.contr(linear,y=data$y,x=data$grp)
+test.contr(quad,y=data$y,x=data$grp)
+
+
+```
+
+In the last call, the `Estimate` is the contrast value $\sum{c_im_i}$. Results are obviously the same as the results obtained with means and standard deviations as input.
+
+
+# Effect sizes translation
+
+$\eta_p^2$, $f$ and $d$ can be transformed one into the other with the following commands.
+
+```{r,results='markup'}
+### we use the d of the linear contrast of the previous example
+dgl
+dzl
+
+## from dg to eta-squared
+(eta2<-eta2.contr.d(linear,dgl,"g"))
+(f<-f.contr.d(linear,dgl,"g"))
+### and back
+d.contr.eta2(linear,eta2,"g")
+d.contr.f(linear,f,"g")
+
+## from dz to eta-squared
+(eta2<-eta2.contr.d(linear,dzl,"z"))
+(f<-f.contr.d(linear,dzl,"z"))
+### and back
+d.contr.eta2(linear,eta2,"z")
+d.contr.f(linear,f,"z")
+
+
+### 
+```
+
+
+## References

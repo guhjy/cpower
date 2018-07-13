@@ -112,6 +112,8 @@ ci.ncpt<-function(ncp,k,n,conf.level=.95) {
 #'
 print <- function(obj) UseMethod("print")
 
+#' @export print.conf.intervals
+
 print.conf.intervals<-function(obj) {
   alpha<-attr(obj,"conf.level")
   center<-attr(obj,"param")
