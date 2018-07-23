@@ -41,7 +41,7 @@ ci.contr<-function(cont,d,n,scale="g",conf.level=.95) {
   sub<-ifelse(is.numeric(scale),"c",scale)
 
   k<-length(cont)
-  d0<-.tod0(cont,d,scale=scale)
+  d0<-.tod0(cont,d,scale)
   ncp<-d0*(sqrt(n/sum(cont^2)))
   ci<-ci.ncpt(ncp = ncp,k = k,n = n,conf.level = conf.level )
   ci0<-lapply(ci,function(x) x*sqrt(sum(cont^2)/n))
