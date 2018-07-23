@@ -128,7 +128,7 @@ contr.custom<-function(cont) {
 #' Perform a t-test for custom contrast
 #' @param cont contrast codes as a numeric vector with length=k
 #' @param d effect size index to test
-#' @param n total sample size required if d is provided
+#' @param n group size required if d is provided (n per cell)
 #' @param scale scaling method used to compute d. Required if d is provided
 #' @param y numeric vector of the dependent variable
 #' @param x numeric vector of the independent variable with k-groups, with k being length(cont). It must be coercible to a factor
@@ -192,8 +192,8 @@ test.contr<-function(cont,d=NULL,n=NULL,scale=NULL,y=NULL,x=NULL) {
    k<-length(cont)
    d0<-.tod0(cont,d,scale)
    dz<-.fromd0(cont,d0,"z")
-   ttest<-sqrt(n/k)*dz
-   p<-2*pt(-abs(ttest),df=n-k)
+   ttest<-sqrt(n)*dz
+   p<-2*pt(-abs(ttest),df=k*(n-1))
    return(c(d=d,"t value"=ttest,"Pr(>|t|)" =p))
   }
 

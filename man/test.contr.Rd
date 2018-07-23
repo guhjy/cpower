@@ -11,7 +11,7 @@ test.contr(cont, d = NULL, n = NULL, scale = NULL, y = NULL, x = NULL)
 
 \item{d}{effect size index to test}
 
-\item{n}{total sample size required if d is provided}
+\item{n}{group size required if d is provided (n per cell)}
 
 \item{scale}{scaling method used to compute d. Required if d is provided}
 
