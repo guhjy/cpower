@@ -121,7 +121,7 @@ print <- function(obj) UseMethod("print")
 #' @author Marcello Gallucci, \email{mcfanda@gmail.com}
 #' @seealso \code{\link[cpower]{ci.contr}}
 #' @keywords power, contrasts, planned comparisons
-#' @export
+#' @export print.conf.intervals
 #'
 #'
 
