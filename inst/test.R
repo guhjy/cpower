@@ -1,3 +1,6 @@
+#library(devtools)
+#install_github("mcfanda/cpower")
+
 ### examples
 ##### d.cont ###
 cont<-c(-3,-1,1,3)

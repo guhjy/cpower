@@ -112,7 +112,18 @@ ci.ncpt<-function(ncp,k,n,conf.level=.95) {
 #'
 print <- function(obj) UseMethod("print")
 
-#' @export print.conf.intervals
+
+#' Nice printing for confidence intervals
+#'
+#'
+#' @param obj  an object of class "conf.intervals"
+
+#' @author Marcello Gallucci, \email{mcfanda@gmail.com}
+#' @seealso \code{\link[cpower]{ci.contr}}
+#' @keywords power, contrasts, planned comparisons
+#' @export
+#'
+#'
 
 print.conf.intervals<-function(obj) {
   alpha<-attr(obj,"conf.level")

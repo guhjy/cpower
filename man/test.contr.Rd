@@ -15,11 +15,9 @@ test.contr(cont, d = NULL, n = NULL, scale = NULL, y = NULL, x = NULL)
 
 \item{scale}{scaling method used to compute d. Required if d is provided}
 
-\item{data}{data.frame containing the variables to be analysed}
+\item{y}{numeric vector of the dependent variable}
 
-\item{yname}{name (string) of the dependent variable}
-
-\item{xname}{name (string) of the independent variable with k-groups, with k being length(cont)}
+\item{x}{numeric vector of the independent variable with k-groups, with k being length(cont). It must be coercible to a factor}
 }
 \value{
 t-test for the contrast. The \code{Estimate} is the contrast value estimate from the data and the \code{Std. Error} is expressed in the same
@@ -43,19 +41,17 @@ The test can be performed either on raw data on a d coefficient. When \code{d} i
 cont<-c(-3,-1,1,3)
 means<-c(10,12,10,12)
 y<-rep(means,1000)+rnorm(4000,0,10)
-x<-rep(1:4,1000)
-dat<-as.data.frame(cbind(y,x))
-dat$x<-factor(dat$x)
+x<-factor(rep(1:4,1000))
 
-test.contr(data = dat,cont=cont,yname = "y",xname = "x")
+test.contr(cont=cont,y = y,x = x)
 
 # check the contrast value
-observed<-tapply(dat$y,dat$x,mean)
+observed<-tapply(y,x,mean)
 observed\%*\%cont
 
 # check the t-test and p-value
-contrasts(dat$x)<-contr.custom(cont)
-summary(lm(y~x,data=dat))
+contrasts(x)<-contr.custom(cont)
+summary(lm(y~x))
 }
 \author{
 Marcello Gallucci, \email{mcfanda@gmail.com}
